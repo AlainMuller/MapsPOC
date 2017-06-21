@@ -40,7 +40,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Add a (draggable) marker in Rennes and move the camera
         LatLng rennes = new LatLng(48.114188, -1.616881);
-        mMap.addMarker(new MarkerOptions().position(rennes).title("Marker in Rennes"));
+        mMap.addMarker(new MarkerOptions().position(rennes).title("Marker in Rennes").draggable(true));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(rennes));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(14.0f));
     }
