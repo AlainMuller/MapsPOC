@@ -3,6 +3,7 @@ package fr.alainmuller.mapspoc;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
+import com.golovin.googlemapmask.MapHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -11,6 +12,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private static final LatLng RENNES = new LatLng(48.114188, -1.616881);
 
     private GoogleMap mMap;
 
@@ -39,9 +42,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a (draggable) marker in Rennes and move the camera
-        LatLng rennes = new LatLng(48.114188, -1.616881);
-        mMap.addMarker(new MarkerOptions().position(rennes).title("Marker in Rennes").draggable(true));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(rennes));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(14.0f));
+        mMap.addMarker(new MarkerOptions().position(RENNES).title("Marker in Rennes").draggable(true));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RENNES, 13));
+
+        // Add a polygon with a hole
+        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, RENNES, 2));
     }
 }
