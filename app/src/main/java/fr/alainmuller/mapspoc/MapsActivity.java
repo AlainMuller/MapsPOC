@@ -8,12 +8,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private static final LatLng RENNES = new LatLng(48.114188, -1.616881);
+    private static final LatLng HOME = new LatLng(48.116050, -1.602749);
+    private static final LatLng UFO = new LatLng(48.116242, -1.604080);
 
     private GoogleMap mMap;
 
@@ -40,12 +42,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
         // Add a (draggable) marker in Rennes and move the camera
-        mMap.addMarker(new MarkerOptions().position(RENNES).title("Marker in Rennes").draggable(true));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RENNES, 13));
+        mMap.addMarker(new MarkerOptions().position(HOME)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.home))
+                .draggable(true));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HOME, 17.2f));
 
         // Add a polygon with a hole
-        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, RENNES, 2));
+        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, HOME, 0.2f));
+
+        // Add flying object marker
+        mMap.addMarker(new MarkerOptions().position(UFO)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.aeronef))
+                .rotation(100));
     }
 }

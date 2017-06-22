@@ -21,7 +21,7 @@ public final class MapHelper {
         //no instance
     }
 
-    public static PolygonOptions createPolygonWithCircle(Context context, LatLng center, int radius) {
+    public static PolygonOptions createPolygonWithCircle(Context context, LatLng center, float radius) {
 
         return new PolygonOptions()
                 .fillColor(ContextCompat.getColor(context, R.color.grey_500_transparent))
@@ -47,7 +47,7 @@ public final class MapHelper {
         }};
     }
 
-    private static Iterable<LatLng> createHole(LatLng center, int radius) {
+    private static Iterable<LatLng> createHole(LatLng center, float radius) {
         int points = 100; // number of corners of inscribed polygon
 
         double radiusLatitude = Math.toDegrees(radius / (float) EARTH_RADIUS);
