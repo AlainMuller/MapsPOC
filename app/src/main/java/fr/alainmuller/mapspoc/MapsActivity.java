@@ -37,7 +37,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -60,6 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a (draggable) marker in Rennes and move the camera
         mMap.addMarker(new MarkerOptions().position(HOME)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.home))
+                .anchor(0.5f, 0.5f)
                 .draggable(true));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HOME, 17.2f));
 
@@ -69,11 +69,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add flying object marker
         mMap.addMarker(new MarkerOptions().position(UFO)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.aeronef))
+                .anchor(0.5f, 0.9f)
                 .rotation(100));
 
         // Add RTH line between flying object and home
         Polyline polyline = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
         MapHelper.stylePolyline(polyline, true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted.
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        turnOnMyLocation();
+                    }
+                } else {
+                    // Permission denied, Disable the functionality that depends on this permission.
+                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     private boolean checkLocationPermission() {
@@ -93,26 +113,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return false;
         } else {
             return true;
-        }
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted.
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        turnOnMyLocation();
-                    }
-                } else {
-                    // Permission denied, Disable the functionality that depends on this permission.
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
-                }
-            }
         }
     }
 
