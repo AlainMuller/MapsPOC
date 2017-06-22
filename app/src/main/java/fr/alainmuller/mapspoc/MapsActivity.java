@@ -1,7 +1,12 @@
 package fr.alainmuller.mapspoc;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 import com.golovin.googlemapmask.MapHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,10 +21,10 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     // Location constants
     private static final LatLng HOME = new LatLng(48.116050, -1.602749);
     private static final LatLng UFO = new LatLng(48.116242, -1.604080);
-
     private GoogleMap mMap;
 
     @Override
@@ -47,6 +52,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 
+        // Enabling MyLocation Layer of Google Map
+        if (checkLocationPermission()) {
+            turnOnMyLocation();
+        }
+
         // Add a (draggable) marker in Rennes and move the camera
         mMap.addMarker(new MarkerOptions().position(HOME)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.home))
@@ -64,5 +74,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add RTH line between flying object and home
         Polyline polyline = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
         MapHelper.stylePolyline(polyline, true);
+    }
+
+    private boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Asking user if explanation is needed
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                // Prompt the user once explanation has been shown
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted.
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        turnOnMyLocation();
+                    }
+                } else {
+                    // Permission denied, Disable the functionality that depends on this permission.
+                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private void turnOnMyLocation() {
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setTiltGesturesEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
     }
 }
