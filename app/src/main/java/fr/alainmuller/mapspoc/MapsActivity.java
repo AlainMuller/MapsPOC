@@ -11,9 +11,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    // Location constants
     private static final LatLng HOME = new LatLng(48.116050, -1.602749);
     private static final LatLng UFO = new LatLng(48.116242, -1.604080);
 
@@ -57,5 +60,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(UFO)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.aeronef))
                 .rotation(100));
+
+        // Add RTH line between flying object and home
+        Polyline polyline = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
+        MapHelper.stylePolyline(polyline, true);
     }
 }
