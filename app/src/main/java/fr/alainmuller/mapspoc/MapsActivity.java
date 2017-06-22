@@ -1,11 +1,13 @@
 package fr.alainmuller.mapspoc;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.Toast;
 
 import com.golovin.googlemapmask.MapHelper;
@@ -19,13 +21,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import fr.alainmuller.mapspoc.both.BaiduMapActivity;
+import fr.alainmuller.mapspoc.both.GoogleMapActivity;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private GoogleMap mMap;
+    private PatternView mPatternView;
+    SupportMapFragment mapFragment;
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     // Location constants
-    private static final LatLng HOME = new LatLng(48.116050, -1.602749);
-    private static final LatLng UFO = new LatLng(48.116242, -1.604080);
-    private GoogleMap mMap;
+    public static final LatLng HOME = new LatLng(48.116050, -1.602749);
+    public static final LatLng UFO = new LatLng(48.116242, -1.604080);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +43,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mPatternView = (PatternView) findViewById(R.id.pattern);
+
+        findViewById(R.id.google).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MapsActivity.this, GoogleMapActivity.class));
+            }
+        });
+        findViewById(R.id.baidu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MapsActivity.this, BaiduMapActivity.class));
+            }
+        });
     }
+
 
     /**
      * Manipulates the map once available.
@@ -64,7 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HOME, 17.2f));
 
         // Add a polygon with a hole
-        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, HOME, 0.2f));
+//        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, HOME, 0.2f));
 
         // Add flying object marker
         mMap.addMarker(new MarkerOptions().position(UFO)
@@ -75,6 +98,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add RTH line between flying object and home
         Polyline polyline = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
         MapHelper.stylePolyline(polyline, true);
+
+
+//        mPatternView.setMap(mMap);
+//        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+//            @Override
+//            public void onCameraMove() {
+//                mPatternView.updateGeofencingOverlay();
+//            }
+//        });
+
     }
 
     @Override
