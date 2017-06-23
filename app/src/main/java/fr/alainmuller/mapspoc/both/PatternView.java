@@ -17,7 +17,8 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import fr.alainmuller.mapspoc.MapsActivity;
+import com.google.android.gms.maps.model.LatLng;
+
 import fr.alainmuller.mapspoc.R;
 
 /**
@@ -33,7 +34,10 @@ public class PatternView extends View {
     private Paint mHolePaint;
     private IMap mMap;
     private float mZoomLevel;
-    private int mGeofencingRadius;
+    private int mGeofencingRadiusMeters;
+    private int mGeofencingRadiusPixels;
+    private LatLng mCenterLocation;
+    private int mPatternResId;
 
     public PatternView(Context context) {
         super(context);
@@ -77,8 +81,6 @@ public class PatternView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mBitmap == null) return;
-
         mRect = new Rect(0, 0, getWidth(), getHeight());
         mBitmap.eraseColor(Color.TRANSPARENT);
 
@@ -86,14 +88,14 @@ public class PatternView extends View {
             mCanvas.drawRect(mRect, mGeofencingPaint);
 
             IProjection projection = mMap.getProjection();
-            Point point = projection.toScreenLocation(MapsActivity.UFO);
+            Point point = projection.toScreenLocation(mCenterLocation);
 
             float newZoom = mMap.getCameraPosition().zoom;
             if (mZoomLevel != newZoom) {
                 mZoomLevel = newZoom;
-                mGeofencingRadius = ConvertUtils.metersToEquatorPixels(mMap, MapsActivity.UFO, 2000);
+                mGeofencingRadiusPixels = ConvertUtils.metersToEquatorPixels(mMap, mCenterLocation, mGeofencingRadiusMeters);
             }
-            mCanvas.drawCircle(point.x, point.y, mGeofencingRadius, mHolePaint);
+            mCanvas.drawCircle(point.x, point.y, mGeofencingRadiusPixels, mHolePaint);
         }
 
         canvas.drawBitmap(mBitmap, 0, 0, null);
@@ -107,6 +109,11 @@ public class PatternView extends View {
         mMap = map;
     }
 
+    public void setCenterLocation(LatLng centerLocation) {
+        mCenterLocation = centerLocation;
+        invalidate();
+    }
+
     public void setRedPattern() {
         setPattern(R.drawable.pattern_red);
     }
@@ -116,9 +123,15 @@ public class PatternView extends View {
     }
 
     private void setPattern(@DrawableRes int patternResId) {
+        if (mPatternResId == patternResId) return;
+        mPatternResId = patternResId;
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), patternResId);
         Shader shader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         mGeofencingPaint.setShader(shader);
+        invalidate();
     }
 
+    public void setGeofencingRadiusMeters(int geofencingRadiusMeters) {
+        mGeofencingRadiusMeters = geofencingRadiusMeters;
+    }
 }

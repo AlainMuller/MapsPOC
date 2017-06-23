@@ -27,6 +27,7 @@ public interface IMap {
     void setOnMapClickListener(@NonNull GoogleMap.OnMapClickListener listener);
     void setOnMapLongClickListener(@NonNull GoogleMap.OnMapLongClickListener listener);
     void setOnCameraChangeListener(@NonNull GoogleMap.OnCameraMoveListener listener);
+    void setOnMarkerDragListener(@NonNull OnMarkerDragListener listener);
 
     int getMapType();
     @NonNull IProjection getProjection();
@@ -40,4 +41,5 @@ public interface IMap {
 
     @NonNull IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable);
     void addPolyline(boolean geodesic, float width, @NonNull List<LatLng> positions, @NonNull List<Integer> colors);
+
 }

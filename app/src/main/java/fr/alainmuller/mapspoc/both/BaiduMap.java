@@ -142,6 +142,26 @@ import javax.microedition.khronos.opengles.GL10;
     }
 
     @Override
+    public void setOnMarkerDragListener(@NonNull final OnMarkerDragListener listener) {
+        mMap.setOnMarkerDragListener(new com.baidu.mapapi.map.BaiduMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDrag(Marker marker) {
+                listener.onMarkerDrag(new BaiduMarker(marker));
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                listener.onMarkerDragEnd(new BaiduMarker(marker));
+            }
+
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                listener.onMarkerDragStart(new BaiduMarker(marker));
+            }
+        });
+    }
+
+    @Override
     public int getMapType() {
         switch (mMap.getMapType()) {
             case com.baidu.mapapi.map.BaiduMap.MAP_TYPE_NONE:

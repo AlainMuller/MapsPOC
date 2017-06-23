@@ -4,9 +4,12 @@ import android.graphics.Point;
 import android.location.Location;
 import android.support.annotation.NonNull;
 
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatus;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 /*package*/ class ConvertUtils {
 

@@ -86,6 +86,26 @@ import java.util.List;
     }
 
     @Override
+    public void setOnMarkerDragListener(@NonNull final OnMarkerDragListener listener) {
+        mMap.setOnMarkerDragListener(new com.google.android.gms.maps.GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                listener.onMarkerDragStart(new GoogleMarker(marker));
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+                listener.onMarkerDrag(new GoogleMarker(marker));
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                listener.onMarkerDragEnd(new GoogleMarker(marker));
+            }
+        });
+    }
+
+    @Override
     public int getMapType() {
         return mMap.getMapType();
     }
