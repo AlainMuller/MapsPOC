@@ -339,7 +339,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
                 final float azimut = orientation[0];
-                mPositionMarker.setRotation((float) (azimut * (180 / Math.PI)));
+                if (mPositionMarker != null) {
+                    mPositionMarker.setRotation((float) (azimut * (180 / Math.PI)));
+                }
             }
         }
     }
