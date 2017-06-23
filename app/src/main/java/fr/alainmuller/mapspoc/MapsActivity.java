@@ -263,12 +263,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    /*
-     * *********************************************************************************************
-     * PRIVATE METHODS
-     * *********************************************************************************************
-     */
-
     @SuppressWarnings("MissingPermission")
     private void turnOnMyLocation() {
         Log.d(LOG_TAG, "turnOnMyLocation");
