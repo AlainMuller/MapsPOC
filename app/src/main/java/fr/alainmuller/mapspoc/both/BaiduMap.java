@@ -231,9 +231,9 @@ import javax.microedition.khronos.opengles.GL10;
 
     @NonNull
     @Override
-    public IMarker addMarker(@NonNull com.google.android.gms.maps.model.LatLng position, @NonNull Bitmap icon, float rotation) {
+    public IMarker addMarker(@NonNull com.google.android.gms.maps.model.LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable) {
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(ConvertUtils.convert(position)).icon(BitmapDescriptorFactory.fromBitmap(icon)).anchor(0.5f, 0.5f).rotate(rotation);
+        markerOptions.position(ConvertUtils.convert(position)).icon(BitmapDescriptorFactory.fromBitmap(icon)).anchor(0.5f, 0.5f).rotate(rotation).draggable(draggable);
         Marker marker = (Marker) mMap.addOverlay(markerOptions);
         return new BaiduMarker(marker);
     }

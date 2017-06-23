@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         tools:context="fr.alainmuller.mapspoc.MapsActivity"/>
 
-    <fr.alainmuller.mapspoc.PatternView
+    <fr.alainmuller.mapspoc.both.PatternView
         android:id="@+id/pattern"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

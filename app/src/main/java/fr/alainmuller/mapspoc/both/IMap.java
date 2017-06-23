@@ -38,6 +38,6 @@ public interface IMap {
     void snapshot(@NonNull GoogleMap.SnapshotReadyCallback callback);
     @NonNull LatLngBounds getBound();
 
-    @NonNull IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation);
+    @NonNull IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable);
     void addPolyline(boolean geodesic, float width, @NonNull List<LatLng> positions, @NonNull List<Integer> colors);
 }

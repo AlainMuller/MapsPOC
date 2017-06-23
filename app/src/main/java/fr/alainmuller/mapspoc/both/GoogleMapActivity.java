@@ -1,26 +1,27 @@
 package fr.alainmuller.mapspoc.both;
 
-import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import fr.alainmuller.mapspoc.MapsActivity;
-import fr.alainmuller.mapspoc.PatternView;
 import fr.alainmuller.mapspoc.R;
 
 /**
  * Created by jvermet on 22/06/2017.
  */
 
-public class GoogleMapActivity extends Activity {
+public class GoogleMapActivity extends AbsMapActivity {
 
     private PatternView mPatternView;
-    MapLayout mMapLayout;
-    IMapView mMapView;
+    private MapLayout mMapLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,6 +36,7 @@ public class GoogleMapActivity extends Activity {
         mMapView.getMapAsync(new IOnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull IMap map) {
+                mIMap = map;
                 mPatternView.setMap(map);
 
                 map.setOnCameraChangeListener(new GoogleMap.OnCameraMoveListener() {
@@ -44,15 +46,11 @@ public class GoogleMapActivity extends Activity {
                     }
                 });
 
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(MapsActivity.UFO).zoom(14).build();
-                map.moveCamera(cameraPosition);
+
+                moveToUFO();
+                addHomeMarker();
             }
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
 }

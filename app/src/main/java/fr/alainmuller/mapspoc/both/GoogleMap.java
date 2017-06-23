@@ -143,9 +143,9 @@ import java.util.List;
 
     @NonNull
     @Override
-    public IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation) {
+    public IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable) {
         MarkerOptions markOpts = new MarkerOptions();
-        markOpts.position(position).icon(BitmapDescriptorFactory.fromBitmap(icon)).anchor(0.5f, 0.5f).rotation(rotation);
+        markOpts.position(position).icon(BitmapDescriptorFactory.fromBitmap(icon)).anchor(0.5f, 0.5f).rotation(rotation).draggable(draggable);
         Marker marker = mMap.addMarker(markOpts);
         return new GoogleMarker(marker);
     }

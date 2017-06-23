@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import fr.alainmuller.mapspoc.both.BaiduMapActivity;
 import fr.alainmuller.mapspoc.both.GoogleMapActivity;
+import fr.alainmuller.mapspoc.both.PatternView;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 

@@ -1,4 +1,4 @@
-package fr.alainmuller.mapspoc;
+package fr.alainmuller.mapspoc.both;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,15 +12,13 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.location.Location;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.google.android.gms.maps.model.LatLng;
-
-import fr.alainmuller.mapspoc.both.IMap;
-import fr.alainmuller.mapspoc.both.IProjection;
+import fr.alainmuller.mapspoc.MapsActivity;
+import fr.alainmuller.mapspoc.R;
 
 /**
  * Created by jvermet on 22/06/2017.
@@ -31,9 +29,9 @@ public class PatternView extends View {
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private Rect mRect;
-    Paint mGeofencingPaint;
-    Paint mHolePaint;
-    IMap mMap;
+    private Paint mGeofencingPaint;
+    private Paint mHolePaint;
+    private IMap mMap;
     private float mZoomLevel;
     private int mGeofencingRadius;
 
@@ -58,10 +56,8 @@ public class PatternView extends View {
     }
 
     private void init() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pattern_red);
         mGeofencingPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-        Shader mShader1 = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
-        mGeofencingPaint.setShader(mShader1);
+        setGrayPattern();
 
         mHolePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mHolePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -95,33 +91,12 @@ public class PatternView extends View {
             float newZoom = mMap.getCameraPosition().zoom;
             if (mZoomLevel != newZoom) {
                 mZoomLevel = newZoom;
-                mGeofencingRadius = metersToEquatorPixels(mMap, MapsActivity.UFO, 2000);
+                mGeofencingRadius = ConvertUtils.metersToEquatorPixels(mMap, MapsActivity.UFO, 2000);
             }
             mCanvas.drawCircle(point.x, point.y, mGeofencingRadius, mHolePaint);
         }
 
         canvas.drawBitmap(mBitmap, 0, 0, null);
-    }
-
-    public static int metersToEquatorPixels(IMap map, LatLng base, float meters) {
-        final double OFFSET_LON = 0.5d;
-
-        Location baseLoc = new Location("");
-        baseLoc.setLatitude(base.latitude);
-        baseLoc.setLongitude(base.longitude);
-
-        Location dest = new Location("");
-        dest.setLatitude(base.latitude);
-        dest.setLongitude(base.longitude + OFFSET_LON);
-
-        double degPerMeter = OFFSET_LON / baseLoc.distanceTo(dest); // 1m は何度？
-        double lonDistance = meters * degPerMeter; // m を度に変換
-
-        IProjection proj = map.getProjection();
-        Point basePt = proj.toScreenLocation(base);
-        Point destPt = proj.toScreenLocation(new LatLng(base.latitude, base.longitude + lonDistance));
-
-        return Math.abs(destPt.x - basePt.x);
     }
 
     public void updateGeofencingOverlay() {
@@ -130,6 +105,20 @@ public class PatternView extends View {
 
     public void setMap(IMap map) {
         mMap = map;
+    }
+
+    public void setRedPattern() {
+        setPattern(R.drawable.pattern_red);
+    }
+
+    public void setGrayPattern() {
+        setPattern(R.drawable.pattern);
+    }
+
+    private void setPattern(@DrawableRes int patternResId) {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), patternResId);
+        Shader shader = new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        mGeofencingPaint.setShader(shader);
     }
 
 }
