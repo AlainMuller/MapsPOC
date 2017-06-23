@@ -116,6 +116,7 @@ public abstract class AbsMapActivity extends Activity {
             public void onMarkerDragEnd(IMarker marker) {
                 if (!isMarkerDragAllowed(marker.getPosition())) {
                     marker.setPosition(mOriginalPosition);
+                    checkMarkerDragPosition(mOriginalPosition);
                 }
             }
         });
