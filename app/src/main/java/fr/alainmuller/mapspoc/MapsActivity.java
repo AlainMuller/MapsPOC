@@ -51,8 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     // Location constants
-    public static final LatLng HOME = new LatLng(48.113533, -1.615983);
-    public static final LatLng UFO = new LatLng(48.114600, -1.617762);
+    public static final LatLng HOME = new LatLng(48.116050, -1.602749);
+    public static final LatLng UFO = new LatLng(48.116242, -1.604080);
 
     private GoogleMap mMap;
     private Marker mPositionMarker;
@@ -164,21 +164,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add flying object marker
         mMap.addMarker(new MarkerOptions().position(UFO)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.aeronef))
-                .anchor(0.5f, 0.9f)
+                .anchor(0.5f, 0.7f)
                 .rotation(100));
 
         // Add RTH line between flying object and home
         mRTHLine = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
         MapHelper.stylePolyline(mRTHLine, true);
-
-
-//        mPatternView.setMap(mMap);
-//        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-//            @Override
-//            public void onCameraMove() {
-//                mPatternView.updateGeofencingOverlay();
-//            }
-//        });
 
     }
 
@@ -267,7 +258,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void turnOnMyLocation() {
         Log.d(LOG_TAG, "turnOnMyLocation");
 
-        mMap.setMyLocationEnabled(true);
+        mMap.setMyLocationEnabled(false);
         mMap.getUiSettings().setTiltGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
 
@@ -296,7 +287,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(final Location location) {
-        Log.d("MapsActivity", "onLocationChanged");
+        Log.d(LOG_TAG, "onLocationChanged");
         if (mPositionMarker == null) {
             mPositionMarker = mMap.addMarker(new MarkerOptions()
                     .flat(true)
