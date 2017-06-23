@@ -1,14 +1,27 @@
 package fr.alainmuller.mapspoc;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import com.golovin.googlemapmask.MapHelper;
@@ -16,6 +29,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -30,20 +44,33 @@ import fr.alainmuller.mapspoc.both.BaiduMapActivity;
 import fr.alainmuller.mapspoc.both.GoogleMapActivity;
 import fr.alainmuller.mapspoc.both.PatternView;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, SensorEventListener {
 
     private static final String LOG_TAG = MapsActivity.class.getSimpleName();
-
-    private GoogleMap mMap;
-    private Polyline mRTHLine;
-    private PatternView mPatternView;
-    SupportMapFragment mapFragment;
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     // Location constants
-    public static final LatLng HOME = new LatLng(48.116050, -1.602749);
-    public static final LatLng UFO = new LatLng(48.116242, -1.604080);
+    public static final LatLng HOME = new LatLng(48.113533, -1.615983);
+    public static final LatLng UFO = new LatLng(48.114600, -1.617762);
+
+    private GoogleMap mMap;
+    private Marker mPositionMarker;
+
+    private PatternView mPatternView;
+    SupportMapFragment mapFragment;
+    private Polyline mRTHLine;
+
+    private BitmapDescriptor mBitmapUserOriented;
+
+    private LocationManager mLocationManager;
+
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometerSensor;
+    private Sensor mMagnetometerSensor;
+
+    private float[] mGravity;
+    private float[] mGeomagnetic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +94,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(new Intent(MapsActivity.this, BaiduMapActivity.class));
             }
         });
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMagnetometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        mBitmapUserOriented = BitmapDescriptorFactory.fromResource(R.drawable.user_oriented);
     }
 
 
@@ -87,6 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Enabling MyLocation Layer of Google Map
         if (checkLocationPermission()) {
             turnOnMyLocation();
+            turnOnMyOrientation();
         }
 
         // Add a (draggable) marker in Rennes and move the camera
@@ -187,11 +221,146 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        mSensorManager.unregisterListener(this);
+        super.onDestroy();
+    }
+
+    /*
+     * *********************************************************************************************
+     * PRIVATE METHODS
+     * *********************************************************************************************
+     */
+
+    private void animateMarker(final Marker marker, final Location location) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final LatLng startLatLng = marker.getPosition();
+        final long duration = 200;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+
+                double lng = t * location.getLongitude() + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * location.getLatitude() + (1 - t)
+                        * startLatLng.latitude;
+
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
+    }
+
+    /*
+     * *********************************************************************************************
+     * PRIVATE METHODS
+     * *********************************************************************************************
+     */
+
     @SuppressWarnings("MissingPermission")
     private void turnOnMyLocation() {
+        Log.d(LOG_TAG, "turnOnMyLocation");
+
         mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setTiltGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
+
+        final Criteria criteria = new Criteria();
+
+        mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        final String locationProvider = mLocationManager.getBestProvider(criteria, false);
+
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 400, 1, this);
+        final Location location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location != null) {
+            onLocationChanged(location);
+        }
+    }
+
+    private void turnOnMyOrientation() {
+        mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, mMagnetometerSensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    /*
+     * *********************************************************************************************
+     * LOCATION LISTENER METHODS
+     * *********************************************************************************************
+     */
+
+    @Override
+    public void onLocationChanged(final Location location) {
+        Log.d("MapsActivity", "onLocationChanged");
+        if (mPositionMarker == null) {
+            mPositionMarker = mMap.addMarker(new MarkerOptions()
+                    .flat(true)
+                    .icon(mBitmapUserOriented)
+                    .anchor(0.5f, 0.5f)
+                    .position(
+                            new LatLng(location.getLatitude(), location
+                                    .getLongitude())));
+        }
+
+        animateMarker(mPositionMarker, location);
+    }
+
+    @Override
+    public void onStatusChanged(final String s, final int i, final Bundle bundle) {
+        // Nothing to do
+        Log.d(LOG_TAG, "onStatusChanged");
+    }
+
+    @Override
+    public void onProviderEnabled(final String s) {
+        // Nothing to do
+        Log.d(LOG_TAG, "onProviderEnabled");
+    }
+
+    @Override
+    public void onProviderDisabled(final String s) {
+        // Nothing to do
+        Log.d(LOG_TAG, "onProviderDisabled");
+    }
+
+    /*
+     * *********************************************************************************************
+     * SENSOR EVENT LISTENER METHODS
+     * *********************************************************************************************
+     */
+
+    @Override
+    public void onSensorChanged(final SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            mGravity = event.values;
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+            mGeomagnetic = event.values;
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                final float azimut = orientation[0];
+                mPositionMarker.setRotation((float) (azimut * (180 / Math.PI)));
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+        // Nothing to do
     }
 }
