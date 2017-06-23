@@ -101,9 +101,10 @@ public abstract class AbsMapActivity extends Activity {
 
     protected void addMarkerDragListener() {
         mIMap.setOnMarkerDragListener(new OnMarkerDragListener() {
+            private LatLng mOriginalPosition;
             @Override
             public void onMarkerDragStart(IMarker marker) {
-
+                mOriginalPosition = marker.getPosition();
             }
 
             @Override
@@ -113,7 +114,9 @@ public abstract class AbsMapActivity extends Activity {
 
             @Override
             public void onMarkerDragEnd(IMarker marker) {
-//                mPatternView.setCenterLocation(marker.getPosition());
+                if (!isMarkerDragAllowed(marker.getPosition())) {
+                    marker.setPosition(mOriginalPosition);
+                }
             }
         });
     }
