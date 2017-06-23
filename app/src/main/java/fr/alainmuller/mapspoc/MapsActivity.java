@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,9 +18,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.Arrays;
+import java.util.List;
 
 import fr.alainmuller.mapspoc.both.BaiduMapActivity;
 import fr.alainmuller.mapspoc.both.GoogleMapActivity;
@@ -27,11 +32,15 @@ import fr.alainmuller.mapspoc.both.PatternView;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final String LOG_TAG = MapsActivity.class.getSimpleName();
+
     private GoogleMap mMap;
+    private Polyline mRTHLine;
     private PatternView mPatternView;
     SupportMapFragment mapFragment;
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
     // Location constants
     public static final LatLng HOME = new LatLng(48.116050, -1.602749);
     public static final LatLng UFO = new LatLng(48.116242, -1.604080);
@@ -87,8 +96,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .draggable(true));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(HOME, 17.2f));
 
+        // Adjust RTH line when HOME marker is moved
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker arg0) {
+                // Do nothing
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onMarkerDragEnd(Marker arg0) {
+                Log.d(LOG_TAG, "onMarkerDragEnd");
+                // TODO : handle geofencing (reset marker if out of geofence barrier)
+                // Uncomment to center map on new HOME position
+                // mMap.animateCamera(CameraUpdateFactory.newLatLng(arg0.getPosition()));
+            }
+
+            @Override
+            public void onMarkerDrag(Marker arg0) {
+                if (mRTHLine != null && !mRTHLine.getPoints().isEmpty() && mRTHLine.isVisible()) {
+                    // Replace end position of RTH line
+                    final List<LatLng> positions = mRTHLine.getPoints();
+                    positions.set(mRTHLine.getPoints().size() - 1, arg0.getPosition());
+                    mRTHLine.setPoints(positions);
+                    Log.d(LOG_TAG, "onMarkerDrag : " + Arrays.toString(mRTHLine.getPoints().toArray()));
+                }
+            }
+        });
+
         // Add a polygon with a hole
-//        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, HOME, 0.2f));
+        googleMap.addPolygon(MapHelper.createPolygonWithCircle(this, HOME, 0.2f));
 
         // Add flying object marker
         mMap.addMarker(new MarkerOptions().position(UFO)
@@ -97,8 +134,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .rotation(100));
 
         // Add RTH line between flying object and home
-        Polyline polyline = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
-        MapHelper.stylePolyline(polyline, true);
+        mRTHLine = mMap.addPolyline(new PolylineOptions().add(UFO, HOME));
+        MapHelper.stylePolyline(mRTHLine, true);
 
 
 //        mPatternView.setMap(mMap);
