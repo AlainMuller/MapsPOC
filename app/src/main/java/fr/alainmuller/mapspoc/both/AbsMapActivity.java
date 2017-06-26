@@ -11,7 +11,11 @@ import android.support.annotation.Nullable;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+
+import java.util.HashMap;
+import java.util.WeakHashMap;
 
 import fr.alainmuller.mapspoc.MapsActivity;
 import fr.alainmuller.mapspoc.R;
@@ -22,14 +26,24 @@ import fr.alainmuller.mapspoc.R;
 
 public abstract class AbsMapActivity extends Activity {
 
+    public static final int HOME_ID = 1;
+    public static final int UFO_ID = 2;
+    public static final int USER_ID = 3;
+
     public static final LatLng HOME = new LatLng(48.116050, -1.602749);
-    public static final LatLng UFO = new LatLng(48.116242, -1.604080);
+    public static final LatLng UFO = new LatLng(48.116242, -1.614080);
+    public static final LatLng USER = new LatLng(48.116242, -1.623080);
     public static final int GEOFENCE_LIMIT_METERS = 2000;
 
     protected IMapView mMapView;
     protected IMap mIMap;
     protected PatternView mPatternView;
     protected MapLayout mMapLayout;
+    protected HashMap<IMarker, Integer> mMarkers = new HashMap<>();
+
+    private LatLng mHomePosition = HOME;
+    private LatLng mUfoPosition = UFO;
+    private LatLng mUserPosition = USER;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,13 +66,18 @@ public abstract class AbsMapActivity extends Activity {
                 map.setOnCameraChangeListener(new com.google.android.gms.maps.GoogleMap.OnCameraMoveListener() {
                     @Override
                     public void onCameraMove() {
-                        mPatternView.updateGeofencingOverlay();
+                        updateGeofence();
                     }
                 });
 
                 moveToUFO();
                 addHomeMarker();
                 addMarkerDragListener();
+                addDroneMarker();
+                addUserMarker();
+                updateCamera();
+
+                onMapLoaded();
             }
         });
     }
@@ -77,7 +96,20 @@ public abstract class AbsMapActivity extends Activity {
 
     protected void addHomeMarker() {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home);
-        mIMap.addMarker(HOME, bitmap, 0, true);
+        IMarker marker = mIMap.addMarker(HOME, bitmap, 0, true);
+        marker.setId(HOME_ID);
+    }
+
+    protected void addDroneMarker() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.aeronef);
+        IMarker marker = mIMap.addMarker(UFO, bitmap, 0, true);
+        marker.setId(UFO_ID);
+    }
+
+    protected void addUserMarker() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.user);
+        IMarker marker = mIMap.addMarker(USER, bitmap, 0, true);
+        marker.setId(USER_ID);
     }
 
     protected void moveToUFO() {
@@ -102,26 +134,68 @@ public abstract class AbsMapActivity extends Activity {
     protected void addMarkerDragListener() {
         mIMap.setOnMarkerDragListener(new OnMarkerDragListener() {
             private LatLng mOriginalPosition;
+
             @Override
             public void onMarkerDragStart(IMarker marker) {
-                mOriginalPosition = marker.getPosition();
+                if (marker.getId() == HOME_ID) {
+                    mOriginalPosition = marker.getPosition();
+                }
             }
 
             @Override
             public void onMarkerDrag(IMarker marker) {
-                checkMarkerDragPosition(marker.getPosition());
+                if (marker.getId() == HOME_ID) {
+                    checkMarkerDragPosition(marker.getPosition());
+                }
             }
 
             @Override
             public void onMarkerDragEnd(IMarker marker) {
-                if (!isMarkerDragAllowed(marker.getPosition())) {
-                    marker.setPosition(mOriginalPosition);
-                    checkMarkerDragPosition(mOriginalPosition);
+                LatLng position = marker.getPosition();
+                int id = marker.getId();
+                if (id == HOME_ID) {
+                    if (!isMarkerDragAllowed(marker.getPosition())) {
+                        marker.setPosition(mOriginalPosition);
+                        checkMarkerDragPosition(mOriginalPosition);
+                        return;
+                    }
+                    mHomePosition = position;
+                } else if (id == UFO_ID) {
+                    mUfoPosition = position;
+                } else if (id == USER_ID) {
+                    mUserPosition = position;
                 }
+                updateCamera();
             }
         });
     }
 
+    private void updateCamera() {
+        LatLngBounds latLngBounds = new LatLngBounds.Builder()
+                .include(mHomePosition)
+                .include(getOppositePositionFromUFO(mHomePosition))
+                .include(mUfoPosition)
+                .include(mUserPosition)
+                .include(getOppositePositionFromUFO(mUserPosition))
+                .build();
+        mIMap.moveCamera(latLngBounds, 100);
+        updateGeofence();
+    }
+
+    private LatLng getOppositePositionFromUFO(LatLng latLng) {
+        double latitude = mUfoPosition.latitude + (mUfoPosition.latitude - latLng.latitude);
+        double longitude = mUfoPosition.longitude + (mUfoPosition.longitude - latLng.longitude);
+        return new LatLng(latitude, longitude);
+    }
+
+    private void updateGeofence() {
+        mPatternView.updateGeofencingOverlay();
+    }
+
     protected abstract boolean isGoogleMap();
+
+    protected void onMapLoaded() {
+
+    }
 
 }

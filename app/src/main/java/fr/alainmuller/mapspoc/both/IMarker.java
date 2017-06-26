@@ -12,4 +12,6 @@ public interface IMarker {
     void setRotation(float angle);
 
     void remove();
+    void setId(int id);
+    int getId();
 }

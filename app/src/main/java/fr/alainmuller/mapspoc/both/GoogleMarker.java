@@ -38,4 +38,14 @@ import com.google.android.gms.maps.model.Marker;
     public void remove() {
         mMarker.remove();
     }
+
+    @Override
+    public void setId(int id) {
+        mMarker.setTag(id);
+    }
+
+    @Override
+    public int getId() {
+        return (int) mMarker.getTag();
+    }
 }

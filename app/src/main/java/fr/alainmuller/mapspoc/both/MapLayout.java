@@ -7,6 +7,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
 public class MapLayout extends FrameLayout {
     @Nullable
     private OnMapUserActionListener mOnMapUserActionListener;

@@ -1,11 +1,15 @@
 package fr.alainmuller.mapspoc.both;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.baidu.mapapi.map.Marker;
 import com.google.android.gms.maps.model.LatLng;
 
 /*package*/ class BaiduMarker implements IMarker {
+
+    public static final String EXTRA_ID = "extra_id";
+
     @NonNull
     private final Marker mMarker;
 
@@ -38,4 +42,18 @@ import com.google.android.gms.maps.model.LatLng;
     public void remove() {
         mMarker.remove();
     }
+
+    @Override
+    public void setId(int id) {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_ID, id);
+        mMarker.setExtraInfo(extras);
+    }
+
+    @Override
+    public int getId() {
+        Bundle extras = mMarker.getExtraInfo();
+        return extras.getInt(EXTRA_ID, -1);
+    }
+
 }
