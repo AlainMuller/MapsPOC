@@ -25,6 +25,8 @@ import java.util.List;
     @NonNull
     private final com.google.android.gms.maps.GoogleMap mMap;
 
+    private Polyline mPolyline;
+
     public GoogleMap(@NonNull com.google.android.gms.maps.GoogleMap map) {
         mMap = map;
     }
@@ -208,10 +210,14 @@ import java.util.List;
             for (int i = 0; i < positions.size() - 1; i++) {
                 PolylineOptions line = new PolylineOptions().width(width).geodesic(geodesic);
                 line.add(positions.get(i)).add(positions.get(i + 1)).color(colors.get(i));
-                Polyline polyline = mMap.addPolyline(line);
-                MapHelper.stylePolyline(polyline, true);
+                mPolyline = mMap.addPolyline(line);
+                MapHelper.stylePolyline(mPolyline, true);
             }
         }
     }
 
+    @Override
+    public void updateStyledPolyline(@NonNull List<LatLng> positions) {
+        mPolyline.setPoints(positions);
+    }
 }

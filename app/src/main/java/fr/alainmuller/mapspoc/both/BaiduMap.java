@@ -13,15 +13,13 @@ import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.Projection;
 import com.baidu.mapapi.model.LatLng;
-import com.golovin.googlemapmask.MapHelper;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.RoundCap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +37,8 @@ import javax.microedition.khronos.opengles.GL10;
 
     @Nullable
     private GoogleMap.OnCameraMoveListener mCameraChangeListener;
+
+    private Polyline mPolyline;
 
     public BaiduMap(@NonNull com.baidu.mapapi.map.BaiduMap map) {
         mMap = map;
@@ -300,7 +300,7 @@ import javax.microedition.khronos.opengles.GL10;
         }
 
         PolylineOptions options = new PolylineOptions().colorsValues(colors).points(list).width((int) width).dottedLine(true);
-        mMap.addOverlay(options);
+        mPolyline = (Polyline) mMap.addOverlay(options);
     }
 
 
@@ -375,5 +375,16 @@ import javax.microedition.khronos.opengles.GL10;
                 }
             }
         };
+    }
+
+    @Override
+    public void updateStyledPolyline(@NonNull List<com.google.android.gms.maps.model.LatLng> positions) {
+        List<LatLng> convertedPositions = new ArrayList<>(positions.size());
+        for (com.google.android.gms.maps.model.LatLng latLng : positions) {
+            convertedPositions.add(ConvertUtils.convert(latLng));
+        }
+        if (mPolyline != null) {
+            mPolyline.setPoints(convertedPositions);
+        }
     }
 }

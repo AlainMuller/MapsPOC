@@ -53,6 +53,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Location constants
     public static final LatLng HOME = new LatLng(48.116050, -1.602749);
     public static final LatLng UFO = new LatLng(48.116242, -1.604080);
+    public static final LatLng USER = new LatLng(48.115485, -1.602958);
+    public static final int GEOFENCE_LIMIT_METERS = 200;
 
     private GoogleMap mMap;
     private Marker mPositionMarker;

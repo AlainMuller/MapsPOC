@@ -12,18 +12,19 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-
-import java.util.HashMap;
-import java.util.WeakHashMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
-import fr.alainmuller.mapspoc.MapsActivity;
 import fr.alainmuller.mapspoc.R;
 
 import static com.golovin.googlemapmask.MapHelper.POLYLINE_STROKE_WIDTH_PX;
+import static fr.alainmuller.mapspoc.MapsActivity.GEOFENCE_LIMIT_METERS;
+import static fr.alainmuller.mapspoc.MapsActivity.HOME;
+import static fr.alainmuller.mapspoc.MapsActivity.UFO;
+import static fr.alainmuller.mapspoc.MapsActivity.USER;
 
 /**
  * Created by jvermet on 23/06/2017.
@@ -35,10 +36,6 @@ public abstract class AbsMapActivity extends Activity {
     public static final int UFO_ID = 2;
     public static final int USER_ID = 3;
 
-    public static final LatLng HOME = new LatLng(48.116050, -1.602749);
-    public static final LatLng USER = new LatLng(48.116242, -1.623080);
-    public static final LatLng UFO = new LatLng(48.115485, -1.602958);
-    public static final int GEOFENCE_LIMIT_METERS = 200;
 
     protected IMapView mMapView;
     protected IMap mIMap;
@@ -76,15 +73,13 @@ public abstract class AbsMapActivity extends Activity {
                     }
                 });
 
+                addHomeMarker();
                 addUFOMarker();
                 centerView();
-                addHomeMarker();
                 addStyledPolyline();
                 addMarkerDragListener();
-                addDroneMarker();
                 addUserMarker();
                 updateCamera();
-
                 onMapLoaded();
             }
         });
@@ -103,20 +98,15 @@ public abstract class AbsMapActivity extends Activity {
     }
 
     protected void addUFOMarker() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.aeronef);
-        mIMap.addMarker(UFO, bitmap, false, 100, 0.5f, 0.7f);
+        final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.aeronef);
+        final IMarker marker = mIMap.addMarker(UFO, bitmap, false, 100, 0.5f, 0.7f);
+        marker.setId(UFO_ID);
     }
 
     protected void addHomeMarker() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home);
-        IMarker marker = mIMap.addMarker(HOME, bitmap, true);
+        final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home);
+        final IMarker marker = mIMap.addMarker(HOME, bitmap, true);
         marker.setId(HOME_ID);
-    }
-
-    protected void addDroneMarker() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.aeronef);
-        IMarker marker = mIMap.addMarker(UFO, bitmap, true);
-        marker.setId(UFO_ID);
     }
 
     protected void addUserMarker() {
@@ -138,7 +128,7 @@ public abstract class AbsMapActivity extends Activity {
     }
 
     protected void centerView() {
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(MapsActivity.HOME).zoom(17.2f).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(HOME).zoom(17.2f).build();
         mIMap.moveCamera(cameraPosition);
     }
 
@@ -171,6 +161,7 @@ public abstract class AbsMapActivity extends Activity {
             public void onMarkerDrag(IMarker marker) {
                 if (marker.getId() == HOME_ID) {
                     checkMarkerDragPosition(marker.getPosition());
+                    mIMap.updateStyledPolyline(Arrays.asList(new LatLng[]{UFO, marker.getPosition()}));
                 }
             }
 
@@ -182,6 +173,7 @@ public abstract class AbsMapActivity extends Activity {
                     if (!isMarkerDragAllowed(marker.getPosition())) {
                         marker.setPosition(mOriginalPosition);
                         checkMarkerDragPosition(mOriginalPosition);
+                        mIMap.updateStyledPolyline(Arrays.asList(new LatLng[]{UFO, mOriginalPosition}));
                         return;
                     }
                     mHomePosition = position;
