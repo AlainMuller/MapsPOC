@@ -47,4 +47,5 @@ public interface IMap {
 
     void addPolyline(boolean geodesic, float width, @NonNull List<LatLng> positions, @NonNull List<Integer> colors);
 
+    void addStyledPolyline(boolean geodesic, float width, @NonNull List<com.google.android.gms.maps.model.LatLng> positions, @NonNull List<Integer> colors);
 }

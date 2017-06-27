@@ -17,8 +17,13 @@ import com.google.android.gms.maps.model.Marker;
 import java.util.HashMap;
 import java.util.WeakHashMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.alainmuller.mapspoc.MapsActivity;
 import fr.alainmuller.mapspoc.R;
+
+import static com.golovin.googlemapmask.MapHelper.POLYLINE_STROKE_WIDTH_PX;
 
 /**
  * Created by jvermet on 23/06/2017.
@@ -74,6 +79,7 @@ public abstract class AbsMapActivity extends Activity {
                 addUFOMarker();
                 centerView();
                 addHomeMarker();
+                addStyledPolyline();
                 addMarkerDragListener();
                 addDroneMarker();
                 addUserMarker();
@@ -117,6 +123,18 @@ public abstract class AbsMapActivity extends Activity {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.user);
         IMarker marker = mIMap.addMarker(USER, bitmap, true);
         marker.setId(USER_ID);
+    }
+
+    protected void addStyledPolyline() {
+        List<LatLng> positions = new ArrayList<>();
+        positions.add(UFO);
+        positions.add(HOME);
+
+        List<Integer> colors = new ArrayList<>();
+        colors.add(0xff00ff8a);
+
+        // Add RTH line between flying object and home
+        mIMap.addStyledPolyline(true, POLYLINE_STROKE_WIDTH_PX, positions, colors);
     }
 
     protected void centerView() {

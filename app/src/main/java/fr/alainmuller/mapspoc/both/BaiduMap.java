@@ -16,9 +16,12 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.Projection;
 import com.baidu.mapapi.model.LatLng;
+import com.golovin.googlemapmask.MapHelper;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.RoundCap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -287,6 +290,19 @@ import javax.microedition.khronos.opengles.GL10;
         PolylineOptions options = new PolylineOptions().colorsValues(colors).points(list).width((int)width);
         mMap.addOverlay(options);
     }
+
+
+    @Override
+    public void addStyledPolyline(boolean geodesic, float width, @NonNull List<com.google.android.gms.maps.model.LatLng> positions, @NonNull List<Integer> colors) {
+        List<LatLng> list = new ArrayList<>(positions.size());
+        for (com.google.android.gms.maps.model.LatLng latLng : positions) {
+            list.add(ConvertUtils.convert(latLng));
+        }
+
+        PolylineOptions options = new PolylineOptions().colorsValues(colors).points(list).width((int) width).dottedLine(true);
+        mMap.addOverlay(options);
+    }
+
 
     /*package*/ void dispose() {
         mCameraChangeListener = null;

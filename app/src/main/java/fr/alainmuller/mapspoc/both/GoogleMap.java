@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.golovin.googlemapmask.MapHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -14,6 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
@@ -195,6 +197,19 @@ import java.util.List;
                 PolylineOptions line = new PolylineOptions().width(width).geodesic(geodesic);
                 line.add(positions.get(i)).add(positions.get(i + 1)).color(colors.get(i));
                 mMap.addPolyline(line);
+            }
+        }
+    }
+
+
+    @Override
+    public void addStyledPolyline(boolean geodesic, float width, @NonNull List<LatLng> positions, @NonNull List<Integer> colors) {
+        if (positions.size() > 1 && colors.size() >= positions.size() - 1) {
+            for (int i = 0; i < positions.size() - 1; i++) {
+                PolylineOptions line = new PolylineOptions().width(width).geodesic(geodesic);
+                line.add(positions.get(i)).add(positions.get(i + 1)).color(colors.get(i));
+                Polyline polyline = mMap.addPolyline(line);
+                MapHelper.stylePolyline(polyline, true);
             }
         }
     }

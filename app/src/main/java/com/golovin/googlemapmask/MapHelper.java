@@ -29,7 +29,7 @@ public final class MapHelper {
     private static final int PATTERN_GAP_LENGTH_PX = 20;
     private static final PatternItem DASH = new Dash(PATTERN_DASH_LENGTH_PX);
     private static final PatternItem GAP = new Gap(PATTERN_GAP_LENGTH_PX);
-    private static final int POLYLINE_STROKE_WIDTH_PX = 8;
+    public static final int POLYLINE_STROKE_WIDTH_PX = 8;
     private static final List<PatternItem> PATTERN_POLYLINE_DOTTED = Arrays.asList(GAP, DASH);
 
 
