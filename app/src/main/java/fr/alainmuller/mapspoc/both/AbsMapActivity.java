@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -31,9 +31,9 @@ public abstract class AbsMapActivity extends Activity {
     public static final int USER_ID = 3;
 
     public static final LatLng HOME = new LatLng(48.116050, -1.602749);
-    public static final LatLng UFO = new LatLng(48.116242, -1.614080);
     public static final LatLng USER = new LatLng(48.116242, -1.623080);
-    public static final int GEOFENCE_LIMIT_METERS = 2000;
+    public static final LatLng UFO = new LatLng(48.115485, -1.602958);
+    public static final int GEOFENCE_LIMIT_METERS = 200;
 
     protected IMapView mMapView;
     protected IMap mIMap;
@@ -59,6 +59,7 @@ public abstract class AbsMapActivity extends Activity {
             @Override
             public void onMapReady(@NonNull final IMap map) {
                 mIMap = map;
+                mIMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 mPatternView.setMap(map);
                 mPatternView.setGeofencingRadiusMeters(GEOFENCE_LIMIT_METERS);
                 mPatternView.setCenterLocation(HOME);
@@ -70,7 +71,8 @@ public abstract class AbsMapActivity extends Activity {
                     }
                 });
 
-                moveToUFO();
+                addUFOMarker();
+                centerView();
                 addHomeMarker();
                 addMarkerDragListener();
                 addDroneMarker();
@@ -94,26 +96,31 @@ public abstract class AbsMapActivity extends Activity {
         super.onPause();
     }
 
+    protected void addUFOMarker() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.aeronef);
+        mIMap.addMarker(UFO, bitmap, false, 100, 0.5f, 0.7f);
+    }
+
     protected void addHomeMarker() {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home);
-        IMarker marker = mIMap.addMarker(HOME, bitmap, 0, true);
+        IMarker marker = mIMap.addMarker(HOME, bitmap, true);
         marker.setId(HOME_ID);
     }
 
     protected void addDroneMarker() {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.aeronef);
-        IMarker marker = mIMap.addMarker(UFO, bitmap, 0, true);
+        IMarker marker = mIMap.addMarker(UFO, bitmap, true);
         marker.setId(UFO_ID);
     }
 
     protected void addUserMarker() {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.user);
-        IMarker marker = mIMap.addMarker(USER, bitmap, 0, true);
+        IMarker marker = mIMap.addMarker(USER, bitmap, true);
         marker.setId(USER_ID);
     }
 
-    protected void moveToUFO() {
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(MapsActivity.HOME).zoom(14).build();
+    protected void centerView() {
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(MapsActivity.HOME).zoom(17.2f).build();
         mIMap.moveCamera(cameraPosition);
     }
 

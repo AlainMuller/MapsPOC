@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.Projection;
@@ -18,6 +19,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.List;
 
 /*package*/ class GoogleMap implements IMap {
+    private static final String LOG_TAG = GoogleMap.class.getSimpleName();
     @NonNull
     private final com.google.android.gms.maps.GoogleMap mMap;
 
@@ -163,9 +165,25 @@ import java.util.List;
 
     @NonNull
     @Override
-    public IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable) {
+    public IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, boolean draggable, float rotation, float anchorX, float anchorY) {
         MarkerOptions markOpts = new MarkerOptions();
-        markOpts.position(position).icon(BitmapDescriptorFactory.fromBitmap(icon)).anchor(0.5f, 0.5f).rotation(rotation).draggable(draggable);
+        markOpts.position(position).icon(BitmapDescriptorFactory.fromBitmap(icon))
+                .anchor(anchorX, anchorY)
+                .rotation(rotation)
+                .draggable(draggable);
+        Log.d(LOG_TAG, "rotation = " + markOpts.getRotation());
+        Marker marker = mMap.addMarker(markOpts);
+        return new GoogleMarker(marker);
+    }
+
+    @NonNull
+    @Override
+    public IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, boolean draggable) {
+        MarkerOptions markOpts = new MarkerOptions();
+        markOpts.position(position).icon(BitmapDescriptorFactory.fromBitmap(icon))
+                .anchor(0.5f, 0.5f)
+                .rotation(0)
+                .draggable(draggable);
         Marker marker = mMap.addMarker(markOpts);
         return new GoogleMarker(marker);
     }

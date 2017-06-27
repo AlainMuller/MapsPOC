@@ -39,7 +39,12 @@ public interface IMap {
     void snapshot(@NonNull GoogleMap.SnapshotReadyCallback callback);
     @NonNull LatLngBounds getBound();
 
-    @NonNull IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable);
+    @NonNull
+    IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, boolean draggable, float rotation, float anchorX, float anchorY);
+
+    @NonNull
+    IMarker addMarker(@NonNull LatLng position, @NonNull Bitmap icon, boolean draggable);
+
     void addPolyline(boolean geodesic, float width, @NonNull List<LatLng> positions, @NonNull List<Integer> colors);
 
 }

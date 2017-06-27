@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapPoi;
@@ -25,6 +26,7 @@ import java.util.List;
 import javax.microedition.khronos.opengles.GL10;
 
 /*package*/ class BaiduMap implements IMap {
+    private static final String LOG_TAG = BaiduMap.class.getSimpleName();
     @NonNull
     private final com.baidu.mapapi.map.BaiduMap mMap;
     @NonNull
@@ -197,7 +199,7 @@ import javax.microedition.khronos.opengles.GL10;
             @Override
             public void run() {
                 MapStatus.Builder builder = new MapStatus.Builder();
-                builder.target(ConvertUtils.convert(cameraPosition.target)).zoom(cameraPosition.zoom).overlook(-cameraPosition.tilt).rotate(cameraPosition.bearing);
+                builder.target(ConvertUtils.convert(cameraPosition.target)).zoom(cameraPosition.zoom + 1.8f).overlook(-cameraPosition.tilt).rotate(cameraPosition.bearing);
                 mMap.setMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             }
         });
@@ -251,9 +253,27 @@ import javax.microedition.khronos.opengles.GL10;
 
     @NonNull
     @Override
-    public IMarker addMarker(@NonNull com.google.android.gms.maps.model.LatLng position, @NonNull Bitmap icon, float rotation, boolean draggable) {
+    public IMarker addMarker(@NonNull com.google.android.gms.maps.model.LatLng position, @NonNull Bitmap icon, boolean draggable, float rotation, float anchorX, float anchorY) {
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(ConvertUtils.convert(position)).icon(BitmapDescriptorFactory.fromBitmap(icon)).anchor(0.5f, 0.5f).rotate(rotation).draggable(draggable);
+        markerOptions.position(ConvertUtils.convert(position))
+                .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                .anchor(anchorX, anchorY)
+                .rotate(360.0f - rotation) // Baidu maps rotate counter clockwise T_T
+                .draggable(draggable);
+        Log.d(LOG_TAG, "rotation = " + markerOptions.getRotate());
+        Marker marker = (Marker) mMap.addOverlay(markerOptions);
+        return new BaiduMarker(marker);
+    }
+
+    @NonNull
+    @Override
+    public IMarker addMarker(@NonNull com.google.android.gms.maps.model.LatLng position, @NonNull Bitmap icon, boolean draggable) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(ConvertUtils.convert(position))
+                .icon(BitmapDescriptorFactory.fromBitmap(icon))
+                .anchor(0.5f, 0.5f)
+                .rotate(0)
+                .draggable(draggable);
         Marker marker = (Marker) mMap.addOverlay(markerOptions);
         return new BaiduMarker(marker);
     }
